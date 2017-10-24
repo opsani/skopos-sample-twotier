@@ -1,0 +1,87 @@
+doctype: com.datagridsys.doctype/skopos/model
+version: 1
+
+lifecycle:
+  pre_flight:
+    steps:
+      - call:
+          plugin: docker
+          action: network_create
+          label: "Ensure project network exists"
+
+components:
+  nginx:
+    image: opsani/sample-lb:1.0
+    singleton: true
+    provides:
+        ports: [ "80" ]
+    uses:
+      vote : {}
+    visual:
+      x: 300
+      y: 150
+    lifecycle:
+      quality_probe:
+        steps:
+          - probe:
+              image: opsani/probe-http
+              action: service_up
+              label: "Verify nginx: http probe service_up port 80"
+
+  vote:
+    image: opsani/sample-front:${front_ver:-1.1}   # versions 1.1 and 1.2 are available
+    replicas: 3
+    provides:
+        ports: [ "80" ]
+    uses:
+        back: {}
+    visual:
+        x: 600
+        y: 150
+    lifecycle:
+      post_instance_attach:
+        steps:
+          - call:
+              plugin   : docker
+              action   : comp_signal
+              arguments:  { target: "nginx", signal: "HUP" }
+      post_instance_detach:
+        steps:
+          - call:
+              plugin   : docker
+              action   : comp_signal
+              arguments:  { target: "nginx", signal: "HUP" }
+      quality_probe:
+        steps:
+          - probe:
+              image: opsani/probe-http
+              action: service_up
+              label: "Verify vote: http probe service_up port 80"
+
+  back:
+    image: opsani/sample-back:${back_ver:-1.0}  # version 1.0 and 2.0 are available
+    replicas: 3
+    lifecycle:
+      quality_probe:
+        steps:
+          - probe:
+              image: opsani/probe-http
+              action: service_up
+              label: "Verify back: http probe service_up port 8080"
+              arguments: { port: "8080" }
+    provides:
+        ports: [ "8080" ]
+    visual:
+        x: 900
+        y: 150
+
+gateways:
+    in:
+      type: host_port
+      target: ["nginx"]
+      exposes:
+        - port: "${http_port:-80}"  # use value of http_port var, 80 if not defined
+          target_port: "80"
+      visual:
+        x: 20
+        y: 150
