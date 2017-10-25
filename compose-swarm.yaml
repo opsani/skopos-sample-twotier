@@ -17,7 +17,7 @@ services:
       io.skopos.lc.quality_probe.0.ext: ',l=Verify vote: http probe service_up port 80'
       io.skopos.visual.position: 400,150
     ports:
-      - ${http_port-80}:80
+      - ${http_port_swarm-80}:80
 
   back:
     deploy:

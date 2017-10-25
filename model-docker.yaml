@@ -80,7 +80,7 @@ gateways:
       type: host_port
       target: ["nginx"]
       exposes:
-        - port: "${http_port:-80}"  # use value of http_port var, 80 if not defined
+        - port: "${http_port_docker:-8080}"  # use value of http_port_docker var, 8080 if not defined
           target_port: "80"
       visual:
         x: 20

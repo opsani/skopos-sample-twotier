@@ -42,7 +42,7 @@ gateways:
       type: host_port
       target: ["vote"]
       exposes:
-        - port: "${http_port:-80}"  # use value of http_port var, 80 if not defined
+        - port: "${http_port_swarm:-80}"  # use value of http_port_swarm var, 80 if not defined
           target_port: "80"
       visual:
         x: 20

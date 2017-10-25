@@ -16,7 +16,7 @@ services:
       io.skopos.singleton: '1'
       io.skopos.visual.position: 300,150
     ports:
-      - ${http_port-80}:80
+      - ${http_port_docker-8080}:80
 
   vote:
     depends_on:
