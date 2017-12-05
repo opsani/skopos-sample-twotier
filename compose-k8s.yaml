@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  vote:
+    depends_on:
+      - back
+    deploy:
+      replicas: 3
+    expose:
+      - '80'
+    image: opsani/sample-front:${front_ver:-1.1}
+    labels:
+      io.skopos.dt.back: _
+      io.skopos.lb.name: in
+      io.skopos.lb.position: 20,150
+      io.skopos.lc.quality_probe.0: probe opsani/probe-http service_up n=&t=&l=
+      io.skopos.lc.quality_probe.0.ext: ',l=Verify vote: http probe service_up port 80'
+      io.skopos.visual.position: 400,150
+    ports:
+      - ${http_port_k8s-30080}:80
+
+  back:
+    deploy:
+      replicas: 3
+    expose:
+      - '8080'
+    image: opsani/sample-back:${back_ver:-1.0}
+    labels:
+      io.skopos.lc.quality_probe.0: probe opsani/probe-http service_up n=&t=&l= {"port":"8080"}
+      io.skopos.lc.quality_probe.0.ext: ',l=Verify back: http probe service_up port 8080'
+      io.skopos.visual.position: 800,150
